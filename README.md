@@ -61,4 +61,28 @@ class Retrying(object):
         self._wait_exponential_max = wait_exponential_max
         self._wait_jitter_max = wait_jitter_max
 ```
-An added benefit of this approach is that information about default values is now accessible to tools that inspect and display function signatures.
+An added benefit of this approach is that information about default values is
+now accessible to tools that inspect and display function signatures.
+
+A rare occasion when one can observe bitwise OR operator as a part of augmented
+assignment statement
+```python
+def should_reject(self, attempt):
+    reject = False
+    if attempt.has_exception:
+        reject |= self._retry_on_exception(attempt.value[1])
+    else:
+        reject |= self._retry_on_result(attempt.value)
+
+    return reject
+```
+Sadly this isn't particularly good application of this statement. Example above
+can be simplified as follows:
+
+```python
+def should_reject(self, attempt):
+    if attempt.has_exception:
+        return self._retry_on_exception(attempt.value[1])
+    else:
+        return self._retry_on_result(attempt.value)
+```
